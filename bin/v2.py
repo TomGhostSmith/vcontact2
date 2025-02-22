@@ -33,6 +33,46 @@ import vcontact2.exports.cytoscape
 import vcontact2.exports.profiles
 import vcontact2.exports.summaries
 
+import fcntl
+import time
+
+GPULock = "/tmp/GPULock"
+CPULock = "/tmp/CPULock"
+
+def acquire_lock():
+    """Acquire a lock using a file-based locking mechanism."""
+    lock1 = "/tmp/CPULock1"
+    lock2 = "/tmp/CPULock2"
+    while True:
+        try:
+            # Attempt to open the file in write mode
+            lock_file = open(lock1, 'w')
+            # Try to acquire a non-blocking lock (using fcntl)
+            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print(f"got the CPU lock1")
+            # return lock_file
+            return lock_file
+        except BlockingIOError:
+            # If the lock file is already locked, wait for a while before retrying
+            time.sleep(1)
+        try:
+            # Attempt to open the file in write mode
+            lock_file = open(lock2, 'w')
+            # Try to acquire a non-blocking lock (using fcntl)
+            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print(f"got the CPU lock2")
+            # return lock_file
+            return lock_file
+        except BlockingIOError:
+            time.sleep(1)
+
+
+def release_lock(lock_file):
+    """Release the lock on the given lock file."""
+    print(f"release the CPU lock")
+    fcntl.flock(lock_file, fcntl.LOCK_UN)
+    lock_file.close()
+
 
 db_root = pkg_resources.resource_filename("vcontact2", "data/")
 
@@ -719,13 +759,13 @@ def get_dfs(
                 similarity_fp = blastp_out_fp
 
         elif args.rel_mode == "Diamond":    # need CPU lock for better performance
-            
             diamond_out_fn = "{}.self-diamond.tab".format(
                 os.path.basename(proteins_aa_fp).rsplit(".", 1)[0]
             )
             diamond_out_fp = os.path.join(output_dir, diamond_out_fn)
 
             if not os.path.exists(diamond_out_fp):
+                C_lock = acquire_lock()
                 logger.info("Creating Diamond database and running Diamond...")
                 db_fp = vcontact2.protein_clusters.make_diamond_db(
                     proteins_aa_fp, output_dir, args.threads
@@ -738,6 +778,7 @@ def get_dfs(
                     args.pc_alignments,
                     diamond_out_fp,
                 )
+                release_lock(C_lock)
             else:
                 logger.info("Re-using existing Diamond file...")
                 similarity_fp = diamond_out_fp
@@ -974,7 +1015,8 @@ def main(args):
             merged_df,
             pcs_csv_df,
             profiles_matrix_singletons,
-            args.threads,
+            # args.threads,
+            1,
             name,
             args.sig,  # 1.0
             args.max_sig,  # 300
@@ -1017,7 +1059,8 @@ def main(args):
             # permissive -> use abundance (default)
             membership_simple=not args.permissive,
             mode=args.vc_mode,
-            threads=args.threads,
+            # threads=args.threads,
+            threads=1
         )
 
         # gc.pcs = pos, pc_id, size, annotated, keys, nb_proteins
@@ -1052,7 +1095,8 @@ def main(args):
             inflation=args.mod_inflation,
             threshold=args.mod_sig,
             shared_min=args.mod_shared_min,
-            threads=args.threads,
+            # threads=args.threads,
+            threads=1
         )
 
         # modules has saved module df, both pcs and and modules (2 files)

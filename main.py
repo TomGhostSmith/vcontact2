@@ -77,10 +77,10 @@ def main(args):
     command = "conda run -n vContact2 python bin/v2.py --raw-proteins " + proteinFasta + \
           " --proteins-fp " + g2gFile + \
           " --db 'ProkaryoticViralRefSeq211-Merged' " + \
+          " --threads 8 " + \
           " --output-dir " + args.output
         #   " --c1-bin ./cluster_one-1.0.jar " + \
         #   " --rel-mode Diamond " + \
-        #   " --threads 16 " + \
     # os.system(command)
 
     subprocess.run(command, shell=True)
