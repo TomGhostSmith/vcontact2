@@ -77,7 +77,7 @@ def bool_membership(nodes: pd.DataFrame):
         .values
     )  # pos?, # membership
     B = sparse.coo_matrix(
-        ([1.0] * len(xy), zip(*xy)), shape=(nb_contigs, nb_clusters)
+        ([1.0] * len(xy), list(zip(*xy))), shape=(nb_contigs, nb_clusters)
     ).todense()
 
     return B

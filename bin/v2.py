@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """vConTACT 2 - Copyright 2018 Benjamin Bolduc, Guilhem Doulcier.
 
 vConTACT2 (viral Contig Automatic Cluster Taxonomy) is tool to perform
@@ -19,6 +18,8 @@ import psutil
 import pandas as pd
 import numpy as np
 import pkg_resources  # type: ignore
+import sys
+sys.path.append(".")
 import vcontact2
 import vcontact2.protein_clusters
 import vcontact2.pcprofiles
@@ -717,7 +718,8 @@ def get_dfs(
                 logger.info("Re-using existing BLASTP file...")
                 similarity_fp = blastp_out_fp
 
-        elif args.rel_mode == "Diamond":
+        elif args.rel_mode == "Diamond":    # need CPU lock for better performance
+            
             diamond_out_fn = "{}.self-diamond.tab".format(
                 os.path.basename(proteins_aa_fp).rsplit(".", 1)[0]
             )

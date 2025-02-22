@@ -316,7 +316,7 @@ class Modules(object):
             .values
         )
         pa_matrix = sparse.coo_matrix(
-            ([1] * len(xy), zip(*xy)), shape=(nb_clusters, nb_contigs)
+            ([1] * len(xy), list(zip(*xy))), shape=(nb_clusters, nb_contigs)
         )
         # Phage in a given cluster displaying a given module
         c_values: sparse.csr_matrix = pa_matrix.dot(matrix_module)

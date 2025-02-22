@@ -385,15 +385,15 @@ class PCProfiles(object):
                 if sig > thres:
                     results.append([A, B, sig])
                     i += 1
-                    if i % 10000 == 0:
-                        sys.stdout.write(".")
+                    # if i % 10000 == 0:
+                    #     sys.stdout.write(".")
                 else:
                     j += 1
-                    if i % 10000 == 0:
-                        sys.stdout.write(" ")
+                    # if i % 10000 == 0:
+                    #     sys.stdout.write(" ")
 
-        sys.stdout.write("!")
-        sys.stdout.flush()
+        # sys.stdout.write("!")
+        # sys.stdout.flush()
         return results
 
     def grouper(self, iterable, n, fillvalue=None):
@@ -469,7 +469,7 @@ def build_pc_matrices(profiles: pd.DataFrame, contigs: pd.DataFrame, pcs: pd.Dat
     # all(data > 0)
     # A[i[k], j[k]] = data[k]
     matrix = sparse.coo_matrix(
-        ([1] * len(profiles), (zip(*profiles.values))),
+        ([1] * len(profiles), list(zip(*profiles.values))),
         shape=(len(contigs), len(pcs)),
         dtype="bool",
     )
